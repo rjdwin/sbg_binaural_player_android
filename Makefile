@@ -1,5 +1,6 @@
 # Binaural player
 # © Nicolas George -- 2010
+# Modified for modern Android SDK -- 2025
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -19,58 +20,53 @@ RESOURCES = \
 	res/layout/tab_edit.xml \
 	res/layout/tab_play.xml
 NATIVE_LIBS = \
-	tmp/apk/lib/armeabi/libsbagen.so
+	tmp/apk/lib/armeabi-v7a/libsbagen.so
 CLASSES = \
 	tmp/$(PP)/Binaural_player_GUI.class \
 	tmp/$(PP)/Browser.class \
 	tmp/$(PP)/Binaural_player.class \
 	tmp/$(PP)/Binaural_decoder.class
 
-SDK           = $(HOME)/local/android-sdk
-ANDROID       = $(SDK)/platforms/android-7
-NDK           = $(HOME)/local/android-ndk
+# Modern SDK paths
+SDK           = $(CURDIR)/tools/android-sdk
+ANDROID       = $(SDK)/platforms/android-33
+NDK           = $(SDK)/ndk/25.2.9519653
 
-HOST_ARCH = $(shell uname -s -m | tr 'A-Z ' a-z-)
-TOOLCHAIN = arm-linux-androideabi-4.7
+HOST_ARCH = windows-x86_64
+TOOLCHAIN = llvm
 
-KEY_DEBUG     = -keystore $(HOME)/.android/debug.keystore \
+KEY_DEBUG     = -keystore debug.keystore \
 	        -storepass android -keypass android
-KEY_RELEASE   = -keystore $(HOME)/.android/cigaes.keystore
+KEY_RELEASE   = -keystore release.keystore
 BOOTCLASSPATH = $(ANDROID)/android.jar
 TOOLCHAINPATH = $(NDK)/toolchains/$(TOOLCHAIN)/prebuilt/$(HOST_ARCH)/bin
-CC            = $(TOOLCHAINPATH)/arm-linux-androideabi-gcc
-LIBGCC        = $(shell $(CC) -mthumb-interwork -print-libgcc-file-name)
+CC            = $(TOOLCHAINPATH)/clang.exe
+LIBGCC        = $(shell $(CC) -print-libgcc-file-name)
 
 
 JAVA_COMPILE = \
-	LC_CTYPE=en_US.UTF-8 \
 	javac -g -bootclasspath $(BOOTCLASSPATH) -classpath tmp -d tmp \
-	-source 1.7 -target 1.7 $(JAVACFLAGS) $<
+	-source 1.8 -target 1.8 $(JAVACFLAGS) $<
 NATIVE_BUILD = \
 	$(CC) \
-	-I$(NDK)/platforms/android-3/arch-arm/usr/include \
-	-fpic -mthumb-interwork -ffunction-sections -funwind-tables \
-	-fstack-protector -fno-short-enums \
-	-D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ \
-	-D__ARM_ARCH_5TE__ \
-	-march=armv5te -mtune=xscale -msoft-float -mthumb \
+	-I$(NDK)/toolchains/llvm/prebuilt/$(HOST_ARCH)/sysroot/usr/include \
+	-fpic -ffunction-sections -funwind-tables \
+	-fstack-protector-strong -fno-short-enums \
+	-march=armv7-a -mthumb \
 	-fomit-frame-pointer -fno-strict-aliasing -finline-limit=64 \
 	-DANDROID
 NATIVE_LINK = \
-	$(CC) -nostdlib -Wl,-shared,-Bsymbolic \
+	$(CC) -shared \
 	-o $@ $^ \
-	$(LIBGCC) \
-	-L$(NDK)/platforms/android-3/arch-arm/usr/lib \
+	-L$(NDK)/toolchains/llvm/prebuilt/$(HOST_ARCH)/sysroot/usr/lib/arm-linux-androideabi \
 	-llog \
 	-lc \
-	-lstdc++ \
 	-lm \
-	-Wl,--no-undefined \
-	-Wl,-rpath-link=$(NDK)/platforms/android-3/arch-arm/usr/lib
+	-Wl,--no-undefined
 AAPT_PACKAGE_BUILD_APK = \
-	aapt package -f -M AndroidManifest.xml -S res -I $(BOOTCLASSPATH)
+	$(SDK)/build-tools/33.0.2/aapt package -f -M AndroidManifest.xml -S res -I $(BOOTCLASSPATH)
 
-PATH := $(SDK)/build-tools/android-4.2.2:$(SDK)/tools:$(PATH)
+PATH := $(SDK)/build-tools/33.0.2:$(SDK)/cmdline-tools/latest/bin:$(PATH)
 
 all: $(APP)-debug.apk
 
@@ -80,65 +76,50 @@ clean:
 	rm -f Binaural_player-debug.apk res/drawable/icon.png sbagen-test
 	rm -rf tmp/*
 
-upload-emul: $(APP)-debug.apk
-	adb -e install -r $(APP)-debug.apk
+# Create debug keystore
+debug.keystore:
+	keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
 
-upload-dev: $(APP)-debug.apk
-	adb -d install -r $(APP)-debug.apk
+# Create directories
+tmp/apk/lib/armeabi-v7a:
+	mkdir -p tmp/apk/lib/armeabi-v7a
 
-tmp/$(PP)/R.java: AndroidManifest.xml $(RESOURCES)
-	-mkdir -p tmp
-	aapt package -m -J tmp -M AndroidManifest.xml -S res -I $(BOOTCLASSPATH)
+tmp/$(PP):
+	mkdir -p tmp/$(PP)
 
+# Convert SVG icon to PNG
+res/drawable/icon.png: icon.svg
+	mkdir -p res/drawable
+	convert -background none -resize 48x48 icon.svg res/drawable/icon.png
+
+# Generate R.java
+tmp/$(PP)/R.java: AndroidManifest.xml $(RESOURCES) | tmp/$(PP)
+	$(SDK)/build-tools/33.0.2/aapt package -m -J tmp -M AndroidManifest.xml -S res -I $(BOOTCLASSPATH)
+
+# Compile Java classes
+tmp/$(PP)/%.class: %.java tmp/$(PP)/R.java | tmp/$(PP)
+	$(JAVA_COMPILE)
+
+# Build native library
+tmp/apk/lib/armeabi-v7a/libsbagen.so: sbagen.c | tmp/apk/lib/armeabi-v7a
+	$(NATIVE_BUILD) -c -o tmp/sbagen.o $<
+	$(NATIVE_LINK)
+
+# Create DEX file
 tmp/apk/classes.dex: $(CLASSES)
-	-mkdir -p tmp/apk
-	rm -f tmp/Binaural_player-debug-unaligned.apk
-	dx --dex --output=$@ tmp
+	$(SDK)/build-tools/33.0.2/dx --dex --output=$@ tmp
 
+# Package APK
 tmp/$(APP)-debug-unaligned.apk: AndroidManifest.xml $(RESOURCES) \
   	tmp/apk/classes.dex $(NATIVE_LIBS)
 	$(AAPT_PACKAGE_BUILD_APK) -F $@ tmp/apk
-	jarsigner $(KEY_DEBUG) $@ androiddebugkey
 
-tmp/$(APP)-unaligned.apk: AndroidManifest.xml $(RESOURCES) \
-	tmp/apk/classes.dex $(NATIVE_LIBS)
-	$(AAPT_PACKAGE_BUILD_APK) -F $@ tmp/apk
-	jarsigner $(KEY_RELEASE) $@ cigaes
+# Debug APK
+$(APP)-debug.apk: tmp/$(APP)-debug-unaligned.apk debug.keystore
+	$(SDK)/build-tools/33.0.2/zipalign -f 4 $< $@
+	$(SDK)/build-tools/33.0.2/apksigner sign --ks debug.keystore --ks-pass pass:android --key-pass pass:android $@
 
-%.apk: tmp/%-unaligned.apk
-	zipalign -f 4 $< $@
-
-res/drawable/icon.png: icon.svg
-	-mkdir -p res/drawable
-	convert -background transparent -density 72 icon.svg -resize 10% -quality 99 $@
-
-tmp/$(PP)/Binaural_player_GUI.class: Binaural_player_GUI.java
-	$(JAVA_COMPILE)
-
-tmp/$(PP)/Browser.class: Browser.java
-	$(JAVA_COMPILE)
-
-tmp/$(PP)/Binaural_player.class: Binaural_player.java
-	$(JAVA_COMPILE)
-
-tmp/$(PP)/Binaural_decoder.class: Binaural_decoder.java
-	$(JAVA_COMPILE)
-
-tmp/$(PP)/Binaural_player_GUI.class: tmp/$(PP)/R.java tmp/$(PP)/Browser.class
-tmp/$(PP)/Binaural_player.class: tmp/$(PP)/Binaural_decoder.class
-
-tmp/apk/lib/armeabi/libsbagen.so: tmp/sbagen.o
-	-mkdir -p tmp/apk/lib/armeabi
-	$(NATIVE_LINK)
-
-tmp/sbagen.o: sbagen.c
-	$(NATIVE_BUILD) -DBUILD_JNI=1 -O2 -c -o $@ $<
-
-tmp/sbagen.o: tmp/sbagen.h
-
-tmp/sbagen.h: tmp/$(PP)/Binaural_decoder.class
-	javah -o $@ -classpath tmp org.cigaes.binaural_player.Binaural_decoder
-	touch -c $@
-
-sbagen-test: sbagen.c
-	gcc -Wall -O2 -g -o $@ -DBUILD_STANDALONE_TEST=1 sbagen.c -lm
+# Release APK
+$(APP).apk: tmp/$(APP)-debug-unaligned.apk $(KEY_RELEASE)
+	$(SDK)/build-tools/33.0.2/zipalign -f 4 $< $@
+	$(SDK)/build-tools/33.0.2/apksigner sign --ks $(KEY_RELEASE) $@
