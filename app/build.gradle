@@ -2,9 +2,10 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 33
+    namespace "org.cigaes.binaural_player" // Required for newer AGP versions
 
     defaultConfig {
-        applicationId "your.package.name" // <-- Change to your package name!
+        applicationId "org.cigaes.binaural_player"
         minSdkVersion 21
         targetSdkVersion 33
         versionCode 1
@@ -19,6 +20,6 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    // implementation fileTree(dir: 'libs', include: ['*.jar']) // Temporarily commented out
     // Add other dependencies here if needed
 }
