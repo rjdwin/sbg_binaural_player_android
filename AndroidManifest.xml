@@ -3,20 +3,24 @@
   package="org.cigaes.binaural_player"
   android:versionCode="1"
   android:versionName="1.0">
-  
-  <!-- Added permissions for audio playback -->
+
+  <!-- Permission for running audio service in foreground -->
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-  
-  <!-- Specify minimum SDK version -->
+
+  <!-- For backward compatibility (optional): 
+       If you want to let legacy devices open files using file paths,
+       uncomment the following line. SAF does not require it. -->
+  <!-- <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> -->
+
+  <!-- Specify minimum and target SDK version -->
   <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="33" />
-  
+
   <application 
     android:label="Binaural player" 
     android:icon="@drawable/icon"
     android:allowBackup="true"
     android:requestLegacyExternalStorage="true">
-    
+
     <service 
       android:name="Binaural_player" 
       android:process=":player"
