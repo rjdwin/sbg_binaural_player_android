@@ -1,26 +1,33 @@
-name: Android CI
+name: Build Android app
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ main ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ main ]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4
-    - name: set up JDK 11
-      uses: actions/setup-java@v4
-      with:
-        java-version: '11'
-        distribution: 'temurin'
-        cache: gradle
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-    - name: Build with Gradle
-      run: ./gradlew build
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 11
+
+      - name: Install Android SDK
+        uses: android-actions/setup-android@v2
+
+      - name: Build with Gradle
+        run: ./gradlew assembleDebug
+
+      # Optional: Upload APK as a workflow artifact
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
