@@ -27,6 +27,11 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
 
+data class RecentFile(
+    val title: String,
+    val uriString: String
+)
+
 data class ScriptOptionGroup(
     val optionName: String,
     val choices: List<String>,
@@ -47,7 +52,9 @@ data class MainUiState(
     val fileList: List<String> = emptyList(),
     val scriptFile: File? = null,
     val scriptOptions: List<ScriptOptionGroup> = emptyList(),
-    val isIgnoringBatteryOptimizations: Boolean = true
+    val isIgnoringBatteryOptimizations: Boolean = true,
+    val recentFiles: List<RecentFile> = emptyList(),
+    val isRecentFilesExpanded: Boolean = true
 )
 
 class MainViewModel(application: Application) : AndroidViewModel(application),
@@ -74,9 +81,49 @@ class MainViewModel(application: Application) : AndroidViewModel(application),
     private var playerService: Messenger? = null
     private var isConnecting = false
     private val incomingMessenger = Messenger(Handler(Looper.getMainLooper(), this))
+    private val prefs = application.getSharedPreferences("binaural_prefs", Context.MODE_PRIVATE)
 
     init {
         connectService()
+        _uiState.value = _uiState.value.copy(recentFiles = loadRecentFiles())
+    }
+
+    private fun loadRecentFiles(): List<RecentFile> {
+        val raw = prefs.getString("recent_files_v1", null) ?: return emptyList()
+        return raw.split(";;;").mapNotNull { line ->
+            val parts = line.split("|||")
+            if (parts.size >= 2) RecentFile(parts[0], parts[1]) else null
+        }
+    }
+
+    private fun addRecentFile(title: String, uriString: String) {
+        val current = loadRecentFiles().toMutableList()
+        current.removeAll { it.uriString == uriString || it.title == title }
+        current.add(0, RecentFile(title, uriString))
+        val trimmed = current.take(5)
+        val encoded = trimmed.joinToString(";;;") { "${it.title}|||${it.uriString}" }
+        prefs.edit().putString("recent_files_v1", encoded).apply()
+        _uiState.value = _uiState.value.copy(recentFiles = trimmed)
+    }
+
+    fun toggleRecentFilesExpanded() {
+        _uiState.value = _uiState.value.copy(
+            isRecentFilesExpanded = !_uiState.value.isRecentFilesExpanded
+        )
+    }
+
+    fun clearRecentFiles() {
+        prefs.edit().remove("recent_files_v1").apply()
+        _uiState.value = _uiState.value.copy(recentFiles = emptyList())
+    }
+
+    fun loadRecentFile(recentFile: RecentFile) {
+        try {
+            val uri = Uri.parse(recentFile.uriString)
+            loadUri(uri)
+        } catch (e: Exception) {
+            showError("Failed to open recent file: ${e.message}")
+        }
     }
 
     fun selectTab(index: Int) {
@@ -94,6 +141,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application),
     fun loadUri(uri: Uri) {
         try {
             val contentResolver = getApplication<Application>().contentResolver
+            try {
+                contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            } catch (_: Exception) {}
+
             val inputStream = contentResolver.openInputStream(uri) ?: return
             val reader = BufferedReader(InputStreamReader(inputStream))
             val sb = java.lang.StringBuilder()
@@ -103,6 +157,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application),
             }
             reader.close()
             val fileName = uri.lastPathSegment?.substringAfterLast('/') ?: "Imported Sequence"
+            addRecentFile(fileName, uri.toString())
             _uiState.value = _uiState.value.copy(
                 sequenceTitle = fileName,
                 sequenceText = sb.toString(),

@@ -90,8 +90,12 @@ fun BinauralApp(viewModel: MainViewModel = viewModel()) {
             Box(modifier = Modifier.weight(1f)) {
                 when (uiState.selectedTab) {
                     0 -> PresetsScreen(
+                        uiState = uiState,
                         onPresetSelected = { viewModel.loadPreset(it) },
-                        onOpenFile = { filePickerLauncher.launch(arrayOf("*/*")) }
+                        onOpenFile = { filePickerLauncher.launch(arrayOf("*/*")) },
+                        onRecentFileClicked = { viewModel.loadRecentFile(it) },
+                        onToggleRecentExpanded = { viewModel.toggleRecentFilesExpanded() },
+                        onClearRecents = { viewModel.clearRecentFiles() }
                     )
                     1 -> SequenceScreen(
                         uiState = uiState,
