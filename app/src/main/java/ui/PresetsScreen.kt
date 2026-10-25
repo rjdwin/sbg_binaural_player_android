@@ -1,4 +1,4 @@
-package org.cigaes.binaural_player.ui
+package sbgplay.binaural.`in`.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -8,8 +8,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.cigaes.binaural_player.Preset
-import org.cigaes.binaural_player.Presets
+import sbgplay.binaural.`in`.Preset
+import sbgplay.binaural.`in`.Presets
 
 @Composable
 fun PresetsScreen(

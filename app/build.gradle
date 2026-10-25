@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'org.cigaes.binaural_player'
+    namespace 'sbgplay.binaural.in'
     compileSdk 34
 
     defaultConfig {
-        applicationId "org.cigaes.binaural_player"
+        applicationId "sbgplay.binaural.in"
         minSdk 21
         targetSdk 34
         versionCode 4

@@ -1,4 +1,4 @@
-package org.cigaes.binaural_player.ui
+package sbgplay.binaural.`in`.ui
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -10,7 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import org.cigaes.binaural_player.MainViewModel
+import sbgplay.binaural.`in`.MainViewModel
 
 @Composable
 fun GeneratorScreen(viewModel: MainViewModel) {

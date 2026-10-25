@@ -1,4 +1,4 @@
-package org.cigaes.binaural_player
+package sbgplay.binaural.`in`
 
 data class Preset(
     val title: String,

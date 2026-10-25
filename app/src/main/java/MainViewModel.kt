@@ -1,4 +1,4 @@
-package org.cigaes.binaural_player
+package sbgplay.binaural.`in`
 
 import android.app.Application
 import android.content.ComponentName

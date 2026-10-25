@@ -1634,7 +1634,7 @@ die(JNIEnv *env, char c)
 }
 
 void
-Java_org_cigaes_binaural_1player_Binaural_1decoder_sbagen_1init(
+Java_sbgplay_binaural_in_Binaural_1decoder_sbagen_1init(
     JNIEnv *env, jobject self)
 {
     setbuf(stdout, NULL);
@@ -1646,7 +1646,7 @@ Java_org_cigaes_binaural_1player_Binaural_1decoder_sbagen_1init(
 }
 
 void
-Java_org_cigaes_binaural_1player_Binaural_1decoder_sbagen_1set_1parameters(
+Java_sbgplay_binaural_in_Binaural_1decoder_sbagen_1set_1parameters(
     JNIEnv *env, jobject self,
     jint rate, jint prate, jint fade, jstring jroll)
 {
@@ -1667,14 +1667,14 @@ Java_org_cigaes_binaural_1player_Binaural_1decoder_sbagen_1set_1parameters(
 }
 
 void
-Java_org_cigaes_binaural_1player_Binaural_1decoder_sbagen_1exit(
+Java_sbgplay_binaural_in_Binaural_1decoder_sbagen_1exit(
     JNIEnv *env, jobject self)
 {
     sbagen_exit();
 }
 
 void
-Java_org_cigaes_binaural_1player_Binaural_1decoder_sbagen_1parse_1seq(
+Java_sbgplay_binaural_in_Binaural_1decoder_sbagen_1parse_1seq(
     JNIEnv *env, jobject self, jstring jseq)
 {
     const char *seq;
@@ -1689,7 +1689,7 @@ Java_org_cigaes_binaural_1player_Binaural_1decoder_sbagen_1parse_1seq(
 }
 
 void
-Java_org_cigaes_binaural_1player_Binaural_1decoder_sbagen_1free_1seq(
+Java_sbgplay_binaural_in_Binaural_1decoder_sbagen_1free_1seq(
     JNIEnv *env, jobject self)
 {
     sbagen_free_seq();
@@ -1717,7 +1717,7 @@ writeOut(char *buf, int siz)
 }
 
 void
-Java_org_cigaes_binaural_1player_Binaural_1decoder_sbagen_1run(
+Java_sbgplay_binaural_in_Binaural_1decoder_sbagen_1run(
     JNIEnv *env, jobject self)
 {
     jclass class;

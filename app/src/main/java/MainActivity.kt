@@ -1,4 +1,4 @@
-package org.cigaes.binaural_player
+package sbgplay.binaural.`in`
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -18,7 +18,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import org.cigaes.binaural_player.ui.*
+import sbgplay.binaural.`in`.ui.*
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -1,4 +1,4 @@
-package org.cigaes.binaural_player.ui
+package sbgplay.binaural.`in`.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -17,7 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.cigaes.binaural_player.MainUiState
+import sbgplay.binaural.`in`.MainUiState
 
 @Composable
 fun BrowserScreen(

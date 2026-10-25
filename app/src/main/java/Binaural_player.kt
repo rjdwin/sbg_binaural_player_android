@@ -1,4 +1,4 @@
-package org.cigaes.binaural_player
+package sbgplay.binaural.`in`
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -298,7 +298,7 @@ class Binaural_player : Service(), Handler.Callback {
     }
 
     companion object {
-        const val ACTION_PAUSE = "org.cigaes.binaural_player.ACTION_PAUSE"
-        const val ACTION_STOP = "org.cigaes.binaural_player.ACTION_STOP"
+        const val ACTION_PAUSE = "sbgplay.binaural.in.ACTION_PAUSE"
+        const val ACTION_STOP = "sbgplay.binaural.in.ACTION_STOP"
     }
 }
