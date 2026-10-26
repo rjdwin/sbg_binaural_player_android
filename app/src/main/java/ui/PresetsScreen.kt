@@ -3,7 +3,6 @@ package sbgplay.binaural.`in`.ui
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -13,14 +12,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import sbgplay.binaural.`in`.MainUiState
-import sbgplay.binaural.`in`.Preset
-import sbgplay.binaural.`in`.Presets
 import sbgplay.binaural.`in`.RecentFile
 
 @Composable
 fun PresetsScreen(
     uiState: MainUiState,
-    onPresetSelected: (Preset) -> Unit,
     onOpenFile: () -> Unit,
     onRecentFileClicked: (RecentFile) -> Unit,
     onToggleRecentExpanded: () -> Unit,
@@ -118,7 +114,7 @@ fun PresetsScreen(
             }
         }
 
-        // 3. MIDDLE: Brief About Info Card
+        // 3. MIDDLE/BOTTOM: Brief About Info Card
         item {
             Card(
                 colors = CardDefaults.cardColors(
@@ -140,38 +136,6 @@ fun PresetsScreen(
                                "• Released under GNU GPL v2",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSecondaryContainer
-                    )
-                }
-            }
-        }
-
-        // 4. BOTTOM: Built-in Presets List
-        item {
-            Text(
-                text = "Built-in Presets",
-                style = MaterialTheme.typography.titleMedium
-            )
-        }
-
-        items(Presets.items) { preset ->
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onPresetSelected(preset) },
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                )
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = preset.title,
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = preset.description,
-                        style = MaterialTheme.typography.bodySmall
                     )
                 }
             }

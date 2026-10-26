@@ -60,10 +60,12 @@ data class MainUiState(
 class MainViewModel(application: Application) : AndroidViewModel(application),
     Handler.Callback, ServiceConnection {
 
+    private val defaultSequence = "beat: 440+10/60\noff: -\nNOW beat\n+00:30:00 off\n"
+
     private val _uiState = MutableStateFlow(
         MainUiState(
-            sequenceTitle = Presets.items[0].title,
-            sequenceText = Presets.items[0].sequence
+            sequenceTitle = "Default 10Hz Alpha Beat",
+            sequenceText = defaultSequence
         )
     )
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
@@ -128,14 +130,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application),
 
     fun selectTab(index: Int) {
         _uiState.value = _uiState.value.copy(selectedTab = index)
-    }
-
-    fun loadPreset(preset: Preset) {
-        _uiState.value = _uiState.value.copy(
-            sequenceTitle = preset.title,
-            sequenceText = preset.sequence,
-            selectedTab = 1
-        )
     }
 
     fun loadUri(uri: Uri) {

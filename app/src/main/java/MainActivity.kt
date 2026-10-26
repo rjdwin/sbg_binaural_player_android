@@ -54,7 +54,7 @@ fun BinauralApp(viewModel: MainViewModel = viewModel()) {
         }
     }
 
-    val tabs = listOf("Presets", "Sequence", "Generator", "Playing")
+    val tabs = listOf("Home", "Sequence", "Generator", "Playing")
 
     Scaffold(
         topBar = {
@@ -91,7 +91,6 @@ fun BinauralApp(viewModel: MainViewModel = viewModel()) {
                 when (uiState.selectedTab) {
                     0 -> PresetsScreen(
                         uiState = uiState,
-                        onPresetSelected = { viewModel.loadPreset(it) },
                         onOpenFile = { filePickerLauncher.launch(arrayOf("*/*")) },
                         onRecentFileClicked = { viewModel.loadRecentFile(it) },
                         onToggleRecentExpanded = { viewModel.toggleRecentFilesExpanded() },
