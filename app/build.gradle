@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace 'sbgplay.binaural.in'
-    compileSdk 36
+    compileSdk 37
 
     defaultConfig {
         applicationId "sbgplay.binaural.in"
         minSdk 24
-        targetSdk 36
+        targetSdk 37
         versionCode 7
         versionName "7.0"
 
