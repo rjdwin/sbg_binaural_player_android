@@ -94,7 +94,10 @@ fun BinauralApp(viewModel: MainViewModel = viewModel()) {
                         onOpenFile = { filePickerLauncher.launch(arrayOf("*/*")) },
                         onRecentFileClicked = { viewModel.loadRecentFile(it) },
                         onToggleRecentExpanded = { viewModel.toggleRecentFilesExpanded() },
-                        onClearRecents = { viewModel.clearRecentFiles() }
+                        onToggleSelectRecent = { viewModel.toggleRecentFileSelection(it) },
+                        onSelectAllRecents = { viewModel.selectAllRecentFiles() },
+                        onSelectNoneRecents = { viewModel.selectNoneRecentFiles() },
+                        onDeleteSelectedRecents = { viewModel.deleteSelectedRecentFiles() }
                     )
                     1 -> SequenceScreen(
                         uiState = uiState,

@@ -54,6 +54,7 @@ data class MainUiState(
     val scriptOptions: List<ScriptOptionGroup> = emptyList(),
     val isIgnoringBatteryOptimizations: Boolean = true,
     val recentFiles: List<RecentFile> = emptyList(),
+    val selectedRecentUris: Set<String> = emptySet(),
     val isRecentFilesExpanded: Boolean = true
 )
 
@@ -102,10 +103,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application),
         val current = loadRecentFiles().toMutableList()
         current.removeAll { it.uriString == uriString || it.title == title }
         current.add(0, RecentFile(title, uriString))
-        val trimmed = current.take(5)
-        val encoded = trimmed.joinToString(";;;") { "${it.title}|||${it.uriString}" }
-        prefs.edit().putString("recent_files_v1", encoded).apply()
+        val trimmed = current.take(10)
+        saveRecentFiles(trimmed)
         _uiState.value = _uiState.value.copy(recentFiles = trimmed)
+    }
+
+    private fun saveRecentFiles(files: List<RecentFile>) {
+        val encoded = files.joinToString(";;;") { "${it.title}|||${it.uriString}" }
+        prefs.edit().putString("recent_files_v1", encoded).apply()
     }
 
     fun toggleRecentFilesExpanded() {
@@ -114,9 +119,42 @@ class MainViewModel(application: Application) : AndroidViewModel(application),
         )
     }
 
+    fun toggleRecentFileSelection(uriString: String) {
+        val current = _uiState.value.selectedRecentUris.toMutableSet()
+        if (current.contains(uriString)) {
+            current.remove(uriString)
+        } else {
+            current.add(uriString)
+        }
+        _uiState.value = _uiState.value.copy(selectedRecentUris = current)
+    }
+
+    fun selectAllRecentFiles() {
+        val allUris = _uiState.value.recentFiles.map { it.uriString }.toSet()
+        _uiState.value = _uiState.value.copy(selectedRecentUris = allUris)
+    }
+
+    fun selectNoneRecentFiles() {
+        _uiState.value = _uiState.value.copy(selectedRecentUris = emptySet())
+    }
+
+    fun deleteSelectedRecentFiles() {
+        val selected = _uiState.value.selectedRecentUris
+        if (selected.isEmpty()) return
+        val remaining = _uiState.value.recentFiles.filterNot { it.uriString in selected }
+        saveRecentFiles(remaining)
+        _uiState.value = _uiState.value.copy(
+            recentFiles = remaining,
+            selectedRecentUris = emptySet()
+        )
+    }
+
     fun clearRecentFiles() {
         prefs.edit().remove("recent_files_v1").apply()
-        _uiState.value = _uiState.value.copy(recentFiles = emptyList())
+        _uiState.value = _uiState.value.copy(
+            recentFiles = emptyList(),
+            selectedRecentUris = emptySet()
+        )
     }
 
     fun loadRecentFile(recentFile: RecentFile) {

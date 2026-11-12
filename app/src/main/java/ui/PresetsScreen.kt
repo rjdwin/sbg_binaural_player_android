@@ -20,7 +20,10 @@ fun PresetsScreen(
     onOpenFile: () -> Unit,
     onRecentFileClicked: (RecentFile) -> Unit,
     onToggleRecentExpanded: () -> Unit,
-    onClearRecents: () -> Unit
+    onToggleSelectRecent: (String) -> Unit,
+    onSelectAllRecents: () -> Unit,
+    onSelectNoneRecents: () -> Unit,
+    onDeleteSelectedRecents: () -> Unit
 ) {
     LazyColumn(
         modifier = Modifier
@@ -55,24 +58,17 @@ fun PresetsScreen(
                             .clickable { onToggleRecentExpanded() }
                     ) {
                         Text(
-                            text = "🕒 Recent Files",
+                            text = "🕒 Recent Files (${uiState.recentFiles.size})",
                             style = MaterialTheme.typography.titleMedium
                         )
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (uiState.recentFiles.isNotEmpty()) {
-                                TextButton(onClick = onClearRecents) {
-                                    Text("Clear")
-                                }
-                            }
-                            IconButton(onClick = onToggleRecentExpanded) {
-                                Icon(
-                                    imageVector = if (uiState.isRecentFilesExpanded)
-                                        Icons.Default.KeyboardArrowUp
-                                    else
-                                        Icons.Default.KeyboardArrowDown,
-                                    contentDescription = "Toggle Recent Files"
-                                )
-                            }
+                        IconButton(onClick = onToggleRecentExpanded) {
+                            Icon(
+                                imageVector = if (uiState.isRecentFilesExpanded)
+                                    Icons.Default.KeyboardArrowUp
+                                else
+                                    Icons.Default.KeyboardArrowDown,
+                                contentDescription = "Toggle Recent Files"
+                            )
                         }
                     }
 
@@ -85,24 +81,62 @@ fun PresetsScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         } else {
+                            // Toolbar for Select All / Select None / Delete Selected
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    TextButton(onClick = onSelectAllRecents) {
+                                        Text("All")
+                                    }
+                                    TextButton(onClick = onSelectNoneRecents) {
+                                        Text("None")
+                                    }
+                                }
+                                val selectedCount = uiState.selectedRecentUris.size
+                                Button(
+                                    onClick = onDeleteSelectedRecents,
+                                    enabled = selectedCount > 0,
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.error,
+                                        contentColor = MaterialTheme.colorScheme.onError
+                                    )
+                                ) {
+                                    Text(if (selectedCount > 0) "Delete ($selectedCount)" else "Delete")
+                                }
+                            }
+
                             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                 uiState.recentFiles.forEach { recent ->
+                                    val isSelected = uiState.selectedRecentUris.contains(recent.uriString)
                                     Card(
                                         colors = CardDefaults.cardColors(
                                             containerColor = MaterialTheme.colorScheme.surface
                                         ),
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .clickable { onRecentFileClicked(recent) }
+                                        modifier = Modifier.fillMaxWidth()
                                     ) {
                                         Row(
-                                            modifier = Modifier.padding(12.dp),
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 8.dp, vertical = 4.dp),
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
+                                            Checkbox(
+                                                checked = isSelected,
+                                                onCheckedChange = { onToggleSelectRecent(recent.uriString) }
+                                            )
                                             Text(
                                                 text = "🎵 ${recent.title}",
                                                 style = MaterialTheme.typography.bodyMedium,
-                                                color = MaterialTheme.colorScheme.primary
+                                                color = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .clickable { onRecentFileClicked(recent) }
+                                                    .padding(vertical = 8.dp, horizontal = 4.dp)
                                             )
                                         }
                                     }
@@ -131,8 +165,8 @@ fun PresetsScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "• Real-time DSP synthesis engine by SBaGen (Jim Peters)\n" +
-                               "• Modernized Android & AudioTrack integration (Nicolas George)\n" +
-                               "• Clean Jetpack Compose Material 3 UI by Johnson Dcunha & AI Assistant\n" +
+                               "• Original Android port & AudioTrack integration (Nicolas George)\n" +
+                               "• Modernized Android & Clean Jetpack Compose Material 3 UI by Johnson Dcunha & AI Assistant\n" +
                                "• Released under GNU GPL v2",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSecondaryContainer
