@@ -9,7 +9,7 @@ Binaural Player generates binaural beats natively on Android devices using real-
 ### Authors & Contributors
 - **Nicolas George** (<nicolas.george@normalesup.org>) - Original Android port & AudioTrack integration.
 - **Jim Peters** - Author of [SBaGen](http://uazu.net/sbagen/), the underlying DSP synthesis engine.
-- **Johnson Dcunha** - Modernized Android & Clean Jetpack Compose Material 3 UI by Johnson Dcunha - Developer & Maintainer.
+- **Johnson Dcunha** - Modernized Android & Clean Jetpack Compose Material 3 UI  - Developer & Maintainer.
 - **Android Studio AI Assistant (Gemini)** - UI & Code modernization contributor.
 
 ## License
