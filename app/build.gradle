@@ -14,8 +14,8 @@ android {
         applicationId = "sbgplay.binaural.in"
         minSdk = 24
         targetSdk = 37
-        versionCode = 8
-        versionName = "8.0"
+        versionCode = 9
+        versionName = "9.0"
 
         ndk {
             abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"

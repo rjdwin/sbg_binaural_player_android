@@ -1,11 +1,8 @@
 cmake_minimum_required(VERSION 3.22.1)
 
-project("sbagen")
+project("sbagen" C)
 
 add_definitions(-DBUILD_JNI=1)
-
-# Enable 16 KB page alignment for Android 15+ compatibility
-set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-z,max-page-size=16384")
 
 add_library(
     sbagen
@@ -13,19 +10,27 @@ add_library(
     sbagen.c
 )
 
-find_library(
-    log-lib
-    log
-)
+if(ANDROID)
+    find_library(
+        log-lib
+        log
+    )
 
-target_link_libraries(
-    sbagen
-    ${log-lib}
-    m
-)
+    target_link_libraries(
+        sbagen
+        ${log-lib}
+        m
+    )
 
-target_link_options(
-    sbagen
-    PRIVATE
-    "-Wl,-z,max-page-size=16384"
-)
+    # Enable 16 KB page alignment for Android 15+ compatibility
+    target_link_options(
+        sbagen
+        PRIVATE
+        "-Wl,-z,max-page-size=16384"
+    )
+elseif(UNIX)
+    target_link_libraries(
+        sbagen
+        m
+    )
+endif()
